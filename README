@@ -1,0 +1,68 @@
+Intever Public Database for Arcing Event Detection
+InteverArcingDataSet-release1.0
+-----------------------------------------------------------------
+The organization of this database is as follows:
+******directory level one******
+under the parent folder, there are two sub-folders, [6400_embedded] and [10000_recorder].
+Each stands for the Low Resolution data and the High Resolution data.
+
+******directory level two******
+Under each folder, there are two sub-folders [multi-load] and [single-load], and each stands for different load configurations.
+
+******directory level three******
+Under them we have various data folders, e.g. 'electricoven_m1/', where first part of the file name[electricoven] stands for the appliance name[s] in load configuration, and the second part [m1] or [m2] or [m3] stands for the connection mode.
+
+******directory level four******
+Under this final data folder, we have csv files contains voltage and current wav and time_format[1][2].txt file to record the time stamps of each annotation (in seconds).
+
+
+
+
+File time_format[1][2].txt
+-----------------------------------------------------------------
+This file records the time stamp of each event during our data collection experiment.
+There two formats of this file:
+
+Format 1:
+each column represents: ["start", "load", "arc", "extinction", "end"]
+It is corresponded to the states in experiment: “Start——Turn on Appliance——Generate Arc——Stop Arc——End”
+
+Format 2:
+each column represents: ["start","load","arc1","extinction1","arc2","extinction2","load_off","end"]
+It is corresponded to the states in experiment: “Start——Turn on Appliance——Generate Arc——Stop Arc——Generate Arc——Stop Arc——Turn off appliance——End”
+
+
+
+Script GetData.py
+-----------------------------------------------------------------
+******General Description******
+It is prepared for processing one data folder:
+(e.g. D:\THY\DataSet\6400_embedded\single-load\microwaveoven_m1)
+
+the script takes in original current and voltage data (UI.txt) and converts it to [n] rows of sample vector which contains [2*window_size] elements. 
+In each row first half of the elements is voltage data and the second half is current data.
+window_size could be set to 1000 for HR data and 1024 for LR data due to different sampling period time.
+n depends on the numer of data points in one (UI.txt) data file.
+
+According to the time annotation file, time.txt, each row ( sample) is labelled.
+It is annotated into 1 (arcing) and 0 (normal).
+
+******Usage Description******
+The use of GetData.py requires to prepare two parameters, 
+path -- data folder, see example above;
+window_size -- determins the number of data points in one sample;
+
+******Function Description******
+merge_all_sample(self,task="train",is_save=False)
+It merges all UI.txt files under one load configuration (one data folder) into one single unit.
+
+parameter settings: task：train or save；
+train -- remove abnormal samples
+save -- save all samples
+is_save -- to save everything in the orignal data
+
+******Example******
+path=r"D:\THY\DataSet\6400_embedded\single-load\microwaveoven_m1"
+dp=DataProcess(path,1024)
+dp.merge_all_sample(task="train",is_save=True)
+
